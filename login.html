@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprimora IA — Entrar</title>
+  <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; background: #080C17; color: #fff; }
+
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── LADO ESQUERDO (visual) ── */
+    .login-left {
+      background: linear-gradient(140deg, #060A10 0%, #0A0E1A 50%, #081224 100%);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 64px;
+      position: relative; overflow: hidden;
+    }
+    .login-left::before {
+      content: '';
+      position: absolute; top: -20%; right: -20%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(37,99,235,0.14), transparent 65%);
+      pointer-events: none;
+    }
+    .login-left::after {
+      content: '';
+      position: absolute; bottom: -10%; left: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(6,200,216,0.10), transparent 65%);
+      pointer-events: none;
+    }
+    .login-logo { margin-bottom: 56px; position: relative; z-index: 1; }
+    .login-logo img { height: 46px; }
+    .login-left h1 {
+      font-size: 2.2rem; font-weight: 800; line-height: 1.2;
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .login-left h1 span {
+      background: linear-gradient(90deg, #06C8D8, #2563EB);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .login-left p {
+      font-size: 1rem; color: rgba(255,255,255,0.5);
+      line-height: 1.7; max-width: 380px;
+      position: relative; z-index: 1;
+    }
+    .login-features { margin-top: 48px; display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 1; }
+    .login-feature {
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(255,255,255,0.65); font-size: 0.88rem;
+    }
+    .login-feature-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, #06C8D8, #2563EB); flex-shrink: 0;
+    }
+
+    /* ── LADO DIREITO (form) ── */
+    .login-right {
+      background: #F7F9FC;
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px 32px;
+    }
+    .login-card {
+      width: 100%; max-width: 420px;
+    }
+    .login-card-title {
+      font-size: 1.6rem; font-weight: 700;
+      color: #0A0E1A; margin-bottom: 6px;
+    }
+    .login-card-sub {
+      font-size: 0.9rem; color: rgba(0,0,0,0.45); margin-bottom: 32px;
+    }
+
+    /* Tabs */
+    .login-tabs {
+      display: flex; gap: 0;
+      border-bottom: 2px solid rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+    .login-tab {
+      padding: 10px 20px; font-size: 0.9rem; font-weight: 600;
+      color: rgba(0,0,0,0.4); cursor: pointer; border: none;
+      background: none; font-family: 'Poppins', sans-serif;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .login-tab.active { color: #06C8D8; border-bottom-color: #06C8D8; }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(0,0,0,0.45); margin-bottom: 7px;
+    }
+    .form-input {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid rgba(0,0,0,0.12); border-radius: 10px;
+      font-size: 0.95rem; font-family: 'Poppins', sans-serif;
+      color: #0A0E1A; background: #fff; outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      border-color: #06C8D8;
+      box-shadow: 0 0 0 3px rgba(6,200,216,0.1);
+    }
+    .form-input::placeholder { color: rgba(0,0,0,0.25); }
+
+    .btn-login {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      color: #fff; font-size: 0.97rem; font-weight: 700;
+      border: none; border-radius: 10px; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(6,200,216,0.3);
+      margin-top: 8px;
+    }
+    .btn-login:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .form-divider {
+      text-align: center; color: rgba(0,0,0,0.3);
+      font-size: 0.8rem; margin: 20px 0; position: relative;
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; position: absolute; top: 50%; width: 40%; height: 1px;
+      background: rgba(0,0,0,0.1);
+    }
+    .form-divider::before { left: 0; }
+    .form-divider::after { right: 0; }
+
+    .form-footer {
+      text-align: center; margin-top: 20px;
+      font-size: 0.82rem; color: rgba(0,0,0,0.4);
+    }
+    .form-footer a { color: #06C8D8; text-decoration: none; font-weight: 600; }
+
+    .msg-error {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+      color: #dc2626; padding: 10px 14px; border-radius: 8px;
+      font-size: 0.84rem; margin-bottom: 16px; display: none;
+    }
+    .msg-success {
+      background: rgba(6,200,216,0.08); border: 1px solid rgba(6,200,216,0.25);
+      color: #0891B2; padding: 10px 14px; border-radius: 8px;
+      font-size: 0.84rem; margin-bottom: 16px; display: none;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+      .login-page { grid-template-columns: 1fr; }
+      .login-left { display: none; }
+      .login-right { padding: 40px 20px; background: #080C17; }
+      .login-card-title { color: #fff; }
+      .login-card-sub { color: rgba(255,255,255,0.45); }
+      .form-label { color: rgba(255,255,255,0.5); }
+      .form-input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #fff; }
+      .login-tabs { border-bottom-color: rgba(255,255,255,0.1); }
+      .login-tab { color: rgba(255,255,255,0.35); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-page">
+
+  <!-- ESQUERDA -->
+  <div class="login-left">
+    <div class="login-logo">
+      <a href="/"><img src="public/logo/logo removebg.png" alt="Aprimora IA" /></a>
+    </div>
+    <h1>Seu negócio no<br /><span>piloto automático.</span></h1>
+    <p>Acesse o painel da Aprimora IA e gerencie suas automações, leads e configurações de IA em um só lugar.</p>
+    <div class="login-features">
+      <div class="login-feature"><div class="login-feature-dot"></div> Painel de leads em tempo real</div>
+      <div class="login-feature"><div class="login-feature-dot"></div> Configuração da IA de atendimento</div>
+      <div class="login-feature"><div class="login-feature-dot"></div> Relatórios e métricas do negócio</div>
+      <div class="login-feature"><div class="login-feature-dot"></div> Gerenciamento de automações</div>
+    </div>
+  </div>
+
+  <!-- DIREITA -->
+  <div class="login-right">
+    <div class="login-card">
+
+      <div id="tabEntrar">
+        <h2 class="login-card-title">Bem-vindo de volta</h2>
+        <p class="login-card-sub">Entre com seus dados para acessar o painel.</p>
+      </div>
+      <div id="tabCadastrar" style="display:none">
+        <h2 class="login-card-title">Criar conta</h2>
+        <p class="login-card-sub">Preencha os dados para criar seu acesso.</p>
+      </div>
+
+      <div class="login-tabs">
+        <button class="login-tab active" id="btnTabEntrar" onclick="switchTab('entrar')">Entrar</button>
+        <button class="login-tab" id="btnTabCadastrar" onclick="switchTab('cadastrar')">Cadastrar</button>
+      </div>
+
+      <div id="msgError" class="msg-error"></div>
+      <div id="msgSuccess" class="msg-success"></div>
+
+      <!-- FORM ENTRAR -->
+      <form id="formEntrar" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="loginSenha" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-login" id="btnEntrar">Entrar no painel</button>
+        <div class="form-footer" style="margin-top:16px">
+          <a href="#" onclick="switchTab('cadastrar'); return false;">Não tem conta? Cadastre-se</a>
+        </div>
+      </form>
+
+      <!-- FORM CADASTRAR -->
+      <form id="formCadastrar" style="display:none" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" class="form-input" id="regNome" placeholder="Seu nome" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="regEmail" placeholder="seu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="regSenha" placeholder="Mínimo 6 caracteres" minlength="6" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar senha</label>
+          <input type="password" class="form-input" id="regSenhaConf" placeholder="Repita a senha" required />
+        </div>
+        <button type="submit" class="btn-login" id="btnCadastrar">Criar minha conta</button>
+        <div class="form-footer">
+          <a href="#" onclick="switchTab('entrar'); return false;">Já tem conta? Entrar</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ── CONFIG SUPABASE ──
+  // Substitua com suas credenciais do Supabase (Settings → API)
+  const SUPABASE_URL  = 'SEU_SUPABASE_URL';
+  const SUPABASE_KEY  = 'SUA_SUPABASE_ANON_KEY';
+  const supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ── TABS ──
+  function switchTab(tab) {
+    const isEntrar = tab === 'entrar';
+    document.getElementById('tabEntrar').style.display    = isEntrar ? '' : 'none';
+    document.getElementById('tabCadastrar').style.display = isEntrar ? 'none' : '';
+    document.getElementById('formEntrar').style.display   = isEntrar ? '' : 'none';
+    document.getElementById('formCadastrar').style.display= isEntrar ? 'none' : '';
+    document.getElementById('btnTabEntrar').classList.toggle('active', isEntrar);
+    document.getElementById('btnTabCadastrar').classList.toggle('active', !isEntrar);
+    clearMsgs();
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('msgError');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('msgSuccess').style.display = 'none';
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('msgSuccess');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('msgError').style.display = 'none';
+  }
+  function clearMsgs() {
+    document.getElementById('msgError').style.display = 'none';
+    document.getElementById('msgSuccess').style.display = 'none';
+  }
+
+  // ── LOGIN ──
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnEntrar');
+    btn.disabled = true; btn.textContent = 'Entrando...';
+    clearMsgs();
+
+    const email = document.getElementById('loginEmail').value;
+    const senha = document.getElementById('loginSenha').value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+
+    if (error) {
+      showError('E-mail ou senha incorretos.');
+      btn.disabled = false; btn.textContent = 'Entrar no painel';
+      return;
+    }
+
+    // Redireciona para o painel
+    window.location.href = '/painel';
+  }
+
+  // ── CADASTRO ──
+  async function handleRegister(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnCadastrar');
+    clearMsgs();
+
+    const nome  = document.getElementById('regNome').value;
+    const email = document.getElementById('regEmail').value;
+    const senha = document.getElementById('regSenha').value;
+    const conf  = document.getElementById('regSenhaConf').value;
+
+    if (senha !== conf) { showError('As senhas não coincidem.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Criando conta...';
+
+    const { data, error } = await supabase.auth.signUp({
+      email, password: senha,
+      options: { data: { nome_completo: nome } }
+    });
+
+    if (error) {
+      showError(error.message === 'User already registered' ? 'Este e-mail já está cadastrado.' : 'Erro ao criar conta. Tente novamente.');
+      btn.disabled = false; btn.textContent = 'Criar minha conta';
+      return;
+    }
+
+    showSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.');
+    btn.disabled = false; btn.textContent = 'Criar minha conta';
+  }
+
+  // Se já logado, redireciona
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.href = '/painel';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Aprimora IA</title>
+  <link rel="icon" type="image/x-icon" href="../public/favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; background: #F0F4F8; color: #1a1a2e; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 240px; background: #0A0E1A;
+      display: flex; flex-direction: column;
+      border-right: 1px solid rgba(6,200,216,0.1);
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-logo img { height: 34px; }
+    .sidebar-nav { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 10px;
+      color: rgba(255,255,255,0.45); font-size: 0.88rem; font-weight: 500;
+      text-decoration: none; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+    .nav-item.active { background: rgba(6,200,216,0.1); color: #06C8D8; }
+    .nav-item svg { flex-shrink: 0; }
+    .nav-section-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.2);
+      padding: 14px 14px 6px;
+    }
+    .sidebar-footer {
+      padding: 16px 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .user-info {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .user-role { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+    .btn-logout {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 8px; margin-top: 6px;
+      color: rgba(255,255,255,0.3); font-size: 0.8rem;
+      cursor: pointer; border: none; background: none;
+      font-family: 'Poppins', sans-serif; width: 100%;
+      transition: color 0.2s;
+    }
+    .btn-logout:hover { color: rgba(239,68,68,0.8); }
+
+    /* ── MAIN ── */
+    .main { margin-left: 240px; min-height: 100vh; }
+    .topbar {
+      background: #fff; padding: 18px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-size: 1.1rem; font-weight: 700; color: #0A0E1A; }
+    .topbar-sub { font-size: 0.8rem; color: rgba(0,0,0,0.4); margin-top: 2px; }
+    .badge-master {
+      padding: 4px 12px; border-radius: 50px;
+      background: rgba(6,200,216,0.1); border: 1px solid rgba(6,200,216,0.3);
+      color: #06C8D8; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    }
+    .content { padding: 32px; }
+
+    /* ── CARDS MÉTRICAS ── */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 20px; margin-bottom: 32px;
+    }
+    .metric-card {
+      background: #fff; border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    .metric-label { font-size: 0.75rem; font-weight: 600; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric-value { font-size: 2rem; font-weight: 800; margin: 8px 0 4px; color: #0A0E1A; }
+    .metric-delta { font-size: 0.78rem; color: #06C8D8; font-weight: 600; }
+
+    /* ── SEÇÕES ── */
+    .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 700; color: #0A0E1A; }
+    .card-body { padding: 20px 24px; }
+    .btn-sm {
+      padding: 7px 16px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 600;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      color: #fff; border: none; cursor: pointer;
+      font-family: 'Poppins', sans-serif; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn-sm:hover { opacity: 0.85; }
+
+    /* Lead list */
+    .lead-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .lead-item:last-child { border-bottom: none; }
+    .lead-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(6,200,216,0.15), rgba(37,99,235,0.15));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: #06C8D8;
+    }
+    .lead-name { font-size: 0.88rem; font-weight: 600; color: #0A0E1A; }
+    .lead-info { font-size: 0.76rem; color: rgba(0,0,0,0.4); }
+    .lead-time { margin-left: auto; font-size: 0.72rem; color: rgba(0,0,0,0.3); white-space: nowrap; }
+
+    /* AI Config preview */
+    .ia-preview {
+      background: #F7F9FC; border-radius: 10px;
+      padding: 14px 16px; font-size: 0.82rem;
+      color: rgba(0,0,0,0.55); line-height: 1.6;
+      max-height: 160px; overflow: hidden;
+      position: relative; margin-bottom: 16px;
+    }
+    .ia-preview::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 48px;
+      background: linear-gradient(transparent, #F7F9FC);
+    }
+    .ia-prompt-id { font-size: 0.7rem; color: rgba(0,0,0,0.25); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.06em; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 32px; color: rgba(0,0,0,0.3); font-size: 0.85rem; }
+
+    @media (max-width: 1024px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="/"><img src="../public/logo/logo removebg.png" alt="Aprimora IA" /></a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item active" href="/painel">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="/painel/leads.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Leads
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a class="nav-item" href="/painel/ia-config.html" id="navIaConfig">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Instruções da IA
+    </a>
+    <a class="nav-item" href="/painel/usuarios.html" id="navUsuarios">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Usuários
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatarSidebar">?</div>
+      <div>
+        <div class="user-name" id="userNameSidebar">Carregando...</div>
+        <div class="user-role" id="userRoleSidebar">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair da conta
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-sub">Visão geral do seu negócio</div>
+    </div>
+    <span class="badge-master" id="badgeRole" style="display:none">MASTER</span>
+  </div>
+
+  <div class="content">
+    <!-- MÉTRICAS -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Leads hoje</div>
+        <div class="metric-value" id="metLeadsHoje">—</div>
+        <div class="metric-delta">via chat IA</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total de leads</div>
+        <div class="metric-value" id="metLeadsTotal">—</div>
+        <div class="metric-delta">acumulado</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Conversas abertas</div>
+        <div class="metric-value" id="metConversas">—</div>
+        <div class="metric-delta">últimas 24h</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Taxa de conclusão</div>
+        <div class="metric-value" id="metTaxa">—%</div>
+        <div class="metric-delta">do chat</div>
+      </div>
+    </div>
+
+    <!-- SEÇÕES -->
+    <div class="section-grid">
+
+      <!-- Últimos leads -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Últimos leads</div>
+          <a href="/painel/leads.html" class="btn-sm">Ver todos</a>
+        </div>
+        <div class="card-body" id="leadsList">
+          <div class="empty-state">Nenhum lead ainda.<br/>Compartilhe o link do chat!</div>
+        </div>
+      </div>
+
+      <!-- IA Config preview -->
+      <div class="card" id="cardIaConfig">
+        <div class="card-header">
+          <div class="card-title">Instruções da IA</div>
+          <a href="/painel/ia-config.html" class="btn-sm">Editar</a>
+        </div>
+        <div class="card-body">
+          <div class="ia-prompt-id">SYSTEM PROMPT ATIVO</div>
+          <div class="ia-preview" id="iaPreview">Carregando instruções...</div>
+          <a href="/painel/ia-config.html" class="btn-sm" style="display:inline-flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar instruções
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'SEU_SUPABASE_URL';
+  const SUPABASE_KEY = 'SUA_SUPABASE_ANON_KEY';
+  const supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+  let userRole = 'user';
+
+  async function init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/login'; return; }
+
+    currentUser = session.user;
+    const meta = currentUser.user_metadata;
+    const nome = meta?.nome_completo || currentUser.email.split('@')[0];
+    const inicial = nome.charAt(0).toUpperCase();
+
+    document.getElementById('userAvatarSidebar').textContent = inicial;
+    document.getElementById('userNameSidebar').textContent = nome;
+
+    // Verifica se é master (primeiro usuário ou email específico)
+    const { data: perfil } = await supabase
+      .from('perfis')
+      .select('role')
+      .eq('id', currentUser.id)
+      .single();
+
+    userRole = perfil?.role || 'user';
+    document.getElementById('userRoleSidebar').textContent = userRole === 'master' ? 'Master' : 'Usuário';
+
+    if (userRole === 'master') {
+      document.getElementById('badgeRole').style.display = '';
+      document.getElementById('navIaConfig').style.display = 'flex';
+      document.getElementById('navUsuarios').style.display = 'flex';
+    } else {
+      document.getElementById('cardIaConfig').style.display = 'none';
+      document.getElementById('navIaConfig').style.display = 'none';
+      document.getElementById('navUsuarios').style.display = 'none';
+    }
+
+    loadLeads();
+    loadIaPreview();
+  }
+
+  async function loadLeads() {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('criado_em', { ascending: false })
+      .limit(5);
+
+    if (!data || data.length === 0) return;
+
+    const hoje = new Date().toDateString();
+    const leadsHoje = data.filter(l => new Date(l.criado_em).toDateString() === hoje).length;
+
+    document.getElementById('metLeadsHoje').textContent  = leadsHoje;
+    document.getElementById('metLeadsTotal').textContent = data.length;
+
+    const html = data.map(l => `
+      <div class="lead-item">
+        <div class="lead-avatar">${l.nome?.charAt(0)?.toUpperCase() || '?'}</div>
+        <div>
+          <div class="lead-name">${l.nome || 'Sem nome'}</div>
+          <div class="lead-info">${l.empresa || '—'} · ${l.contato || '—'}</div>
+        </div>
+        <div class="lead-time">${timeAgo(l.criado_em)}</div>
+      </div>
+    `).join('');
+    document.getElementById('leadsList').innerHTML = html;
+  }
+
+  async function loadIaPreview() {
+    const { data } = await supabase
+      .from('ia_config')
+      .select('system_prompt')
+      .order('atualizado_em', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (data?.system_prompt) {
+      document.getElementById('iaPreview').textContent = data.system_prompt;
+    }
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'agora';
+    if (m < 60) return `${m}min`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h`;
+    return `${Math.floor(h / 24)}d`;
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,4 +1,9 @@
 {
   "outputDirectory": ".",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/painel", "destination": "/painel/index.html" },
+    { "source": "/login",  "destination": "/login.html" },
+    { "source": "/conversa", "destination": "/conversa.html" }
+  ]
 }

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instruções da IA — Aprimora IA</title>
+  <link rel="icon" type="image/x-icon" href="../public/favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; background: #F0F4F8; color: #1a1a2e; }
+
+    /* ── SIDEBAR (mesmo do dashboard) ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+      background: #0A0E1A; display: flex; flex-direction: column;
+      border-right: 1px solid rgba(6,200,216,0.1); z-index: 100;
+    }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .sidebar-logo img { height: 34px; }
+    .sidebar-nav { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 10px;
+      color: rgba(255,255,255,0.45); font-size: 0.88rem; font-weight: 500;
+      text-decoration: none; transition: all 0.18s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+    .nav-item.active { background: rgba(6,200,216,0.1); color: #06C8D8; }
+    .nav-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 14px 14px 6px; }
+    .sidebar-footer { padding: 16px 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); }
+    .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #06C8D8, #2563EB); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .user-role { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+    .btn-logout { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; margin-top: 6px; color: rgba(255,255,255,0.3); font-size: 0.8rem; cursor: pointer; border: none; background: none; font-family: 'Poppins', sans-serif; width: 100%; transition: color 0.2s; }
+    .btn-logout:hover { color: rgba(239,68,68,0.8); }
+
+    /* ── MAIN ── */
+    .main { margin-left: 240px; min-height: 100vh; }
+    .topbar { background: #fff; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.07); position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 1.1rem; font-weight: 700; color: #0A0E1A; }
+    .topbar-sub { font-size: 0.8rem; color: rgba(0,0,0,0.4); margin-top: 2px; }
+    .content { padding: 32px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: flex-start; }
+
+    /* ── EDITOR ── */
+    .editor-card { background: #fff; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); overflow: hidden; }
+    .editor-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; }
+    .editor-title { font-size: 1rem; font-weight: 700; }
+    .editor-sub { font-size: 0.78rem; color: rgba(0,0,0,0.4); margin-top: 3px; }
+
+    .editor-body { padding: 0; }
+    .editor-toolbar {
+      display: flex; gap: 6px; align-items: center;
+      padding: 12px 16px; background: #F7F9FC;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .toolbar-btn {
+      padding: 5px 12px; border-radius: 6px; font-size: 0.75rem;
+      font-weight: 600; border: 1px solid rgba(0,0,0,0.1);
+      background: #fff; cursor: pointer; color: rgba(0,0,0,0.5);
+      font-family: 'Poppins', sans-serif; transition: all 0.15s;
+    }
+    .toolbar-btn:hover { border-color: #06C8D8; color: #06C8D8; }
+
+    #promptEditor {
+      width: 100%; min-height: 460px; padding: 20px;
+      border: none; outline: none; resize: vertical;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 0.84rem; line-height: 1.7; color: #1a1a2e;
+      background: #fff;
+    }
+
+    .editor-footer {
+      padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .char-count { font-size: 0.75rem; color: rgba(0,0,0,0.3); }
+    .editor-actions { display: flex; gap: 10px; }
+    .btn-save {
+      padding: 10px 24px; border-radius: 8px;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      color: #fff; font-weight: 700; font-size: 0.88rem;
+      border: none; cursor: pointer; font-family: 'Poppins', sans-serif;
+      transition: opacity 0.2s; display: flex; align-items: center; gap: 8px;
+    }
+    .btn-save:hover { opacity: 0.88; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-reset {
+      padding: 10px 20px; border-radius: 8px;
+      background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.5);
+      font-weight: 600; font-size: 0.88rem;
+      border: none; cursor: pointer; font-family: 'Poppins', sans-serif;
+    }
+
+    /* ── PAINEL LATERAL ── */
+    .side-panel { display: flex; flex-direction: column; gap: 20px; }
+    .info-card { background: #fff; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); overflow: hidden; }
+    .info-card-header { padding: 16px 20px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.88rem; font-weight: 700; color: #0A0E1A; }
+    .info-card-body { padding: 16px 20px; }
+
+    .tip-item { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+    .tip-item:last-child { margin-bottom: 0; }
+    .tip-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(6,200,216,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tip-text { font-size: 0.8rem; color: rgba(0,0,0,0.55); line-height: 1.55; }
+    .tip-text strong { color: #0A0E1A; display: block; margin-bottom: 2px; font-size: 0.82rem; }
+
+    .template-list { display: flex; flex-direction: column; gap: 8px; }
+    .template-item {
+      padding: 10px 14px; border-radius: 8px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      cursor: pointer; transition: all 0.18s;
+      font-size: 0.82rem; color: rgba(0,0,0,0.6); font-weight: 500;
+    }
+    .template-item:hover { border-color: #06C8D8; color: #06C8D8; background: rgba(6,200,216,0.04); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: #0A0E1A; color: #fff; padding: 12px 20px;
+      border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      display: none; align-items: center; gap: 10px; z-index: 999;
+    }
+    .toast.show { display: flex; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #06C8D8; }
+
+    .save-status { font-size: 0.75rem; color: rgba(0,0,0,0.3); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><a href="/"><img src="../public/logo/logo removebg.png" alt="Aprimora IA" /></a></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item" href="/painel">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+    </a>
+    <a class="nav-item" href="/painel/leads.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Leads
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a class="nav-item active" href="/painel/ia-config.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Instruções da IA
+    </a>
+    <a class="nav-item" href="/painel/usuarios.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Usuários
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">M</div>
+      <div>
+        <div class="user-name" id="userName">Master</div>
+        <div class="user-role">Master</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Instruções da IA</div>
+      <div class="topbar-sub">Personalize o comportamento da sua assistente virtual</div>
+    </div>
+    <span class="save-status" id="saveStatus">Última atualização: —</span>
+  </div>
+
+  <div class="content">
+
+    <!-- EDITOR -->
+    <div class="editor-card">
+      <div class="editor-header">
+        <div>
+          <div class="editor-title">System Prompt</div>
+          <div class="editor-sub">Este texto define como a IA se comporta em todas as conversas</div>
+        </div>
+      </div>
+      <div class="editor-body">
+        <div class="editor-toolbar">
+          <button class="toolbar-btn" onclick="insertSnippet('[NOME DA IA]')">Nome</button>
+          <button class="toolbar-btn" onclick="insertSnippet('[SERVIÇO]')">Serviço</button>
+          <button class="toolbar-btn" onclick="insertSnippet('[PREÇO]')">Preço</button>
+          <button class="toolbar-btn" onclick="insertSnippet('[REGRA]')">Regra</button>
+        </div>
+        <textarea id="promptEditor" spellcheck="false" oninput="updateCount()"></textarea>
+        <div class="editor-footer">
+          <div class="char-count"><span id="charCount">0</span> caracteres</div>
+          <div class="editor-actions">
+            <button class="btn-reset" onclick="resetToDefault()">Restaurar padrão</button>
+            <button class="btn-save" id="btnSalvar" onclick="savePrompt()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Salvar instruções
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL LATERAL -->
+    <div class="side-panel">
+
+      <!-- Dicas -->
+      <div class="info-card">
+        <div class="info-card-header">💡 Dicas de instrução</div>
+        <div class="info-card-body">
+          <div class="tip-item">
+            <div class="tip-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#06C8D8" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="tip-text"><strong>Defina a personalidade</strong>Dê um nome e tom de voz para a IA (ex: "Você é a Ana, assistente simpática e direta").</div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#06C8D8" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div class="tip-text"><strong>Liste seus serviços</strong>Inclua nome, descrição e preço de cada serviço para a IA apresentar corretamente.</div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#06C8D8" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="tip-text"><strong>Defina limites claros</strong>Diga o que a IA NÃO deve fazer (ex: não inventar preços, não mencionar concorrentes).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Templates -->
+      <div class="info-card">
+        <div class="info-card-header">📋 Templates rápidos</div>
+        <div class="info-card-body">
+          <div class="template-list">
+            <div class="template-item" onclick="useTemplate('vendas')">🛒 Atendimento e vendas</div>
+            <div class="template-item" onclick="useTemplate('suporte')">🛠 Suporte técnico</div>
+            <div class="template-item" onclick="useTemplate('qualificacao')">🎯 Qualificação de leads</div>
+            <div class="template-item" onclick="useTemplate('agendamento')">📅 Agendamento de reuniões</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Instruções salvas com sucesso!</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'SEU_SUPABASE_URL';
+  const SUPABASE_KEY = 'SUA_SUPABASE_ANON_KEY';
+  const supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const DEFAULT_PROMPT = `Você é a Ana, assistente virtual da Aprimora IA.
+
+SOBRE A EMPRESA:
+A Aprimora IA é especializada em automações com Inteligência Artificial para pequenas e médias empresas brasileiras. Ajudamos negócios a crescerem com menos esforço manual.
+
+SERVIÇOS:
+- Automação de atendimento no WhatsApp com IA
+- Qualificação automática de leads
+- Geração automática de propostas comerciais
+- Integração com CRM e sistemas de gestão
+- Treinamento da equipe para uso de IA
+- Mentorias especializadas em automação empresarial
+
+COMO SE COMPORTAR:
+- Tom amigável, próximo e profissional
+- Sempre usar o nome do cliente nas respostas
+- Respostas curtas: máximo 2-3 frases por mensagem
+- Fazer perguntas para entender melhor o negócio
+- Sempre em português brasileiro
+
+REGRAS:
+- Nunca inventar informações ou preços não listados
+- Se não souber, dizer que vai verificar com a equipe
+- Nunca mencionar concorrentes
+- Sempre finalizar coletando o contato do cliente`;
+
+  const TEMPLATES = {
+    vendas: `Você é a Ana, assistente de vendas da Aprimora IA.\n\nSeu objetivo é apresentar nossos serviços, entender a necessidade do cliente e encaminhar para um especialista.\n\nServiços disponíveis:\n- [Liste seus serviços aqui]\n\nRegras:\n- Seja objetiva e simpática\n- Sempre colete o contato ao final\n- Não invente preços`,
+    suporte: `Você é a Ana, assistente de suporte da Aprimora IA.\n\nSeu objetivo é ajudar clientes com dúvidas técnicas sobre nossas automações.\n\nProcedimentos:\n- Pergunte qual serviço o cliente usa\n- Tente resolver o problema em até 3 mensagens\n- Se não resolver, abra um chamado com nome + contato + descrição do problema`,
+    qualificacao: `Você é a Ana, especialista em qualificação da Aprimora IA.\n\nSua missão é qualificar leads coletando:\n1. Nome e empresa\n2. Segmento de atuação\n3. Principal desafio hoje\n4. Tamanho do time\n5. Orçamento disponível\n6. Melhor contato\n\nSeja natural e conversacional. Não faça todas as perguntas de uma vez.`,
+    agendamento: `Você é a Ana, assistente de agendamento da Aprimora IA.\n\nSeu objetivo é marcar reuniões de diagnóstico gratuitas.\n\nFluxo:\n1. Entenda brevemente o negócio\n2. Apresente a reunião de diagnóstico (30min, gratuita, por videoconferência)\n3. Colete: nome, WhatsApp e disponibilidade de horário\n4. Confirme o agendamento\n\nDisponibilidade: Seg a Sex, 9h às 18h`
+  };
+
+  async function init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/login'; return; }
+
+    const nome = session.user.user_metadata?.nome_completo || session.user.email.split('@')[0];
+    document.getElementById('userName').textContent = nome;
+    document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
+
+    // Carrega prompt salvo
+    const { data } = await supabase
+      .from('ia_config')
+      .select('*')
+      .order('atualizado_em', { ascending: false })
+      .limit(1)
+      .single();
+
+    const prompt = data?.system_prompt || DEFAULT_PROMPT;
+    document.getElementById('promptEditor').value = prompt;
+    updateCount();
+
+    if (data?.atualizado_em) {
+      document.getElementById('saveStatus').textContent =
+        'Última atualização: ' + new Date(data.atualizado_em).toLocaleString('pt-BR');
+    }
+  }
+
+  function updateCount() {
+    const len = document.getElementById('promptEditor').value.length;
+    document.getElementById('charCount').textContent = len.toLocaleString('pt-BR');
+  }
+
+  async function savePrompt() {
+    const btn = document.getElementById('btnSalvar');
+    btn.disabled = true; btn.innerHTML = '...Salvando';
+
+    const prompt = document.getElementById('promptEditor').value.trim();
+    if (!prompt) { showToast('Instrução não pode estar vazia.'); btn.disabled = false; return; }
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    const { error } = await supabase.from('ia_config').insert({
+      system_prompt: prompt,
+      atualizado_por: session.user.id,
+      atualizado_em: new Date().toISOString()
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar instruções`;
+
+    if (error) { showToast('Erro ao salvar. Tente novamente.'); return; }
+
+    document.getElementById('saveStatus').textContent = 'Última atualização: agora mesmo';
+    showToast('✅ Instruções salvas! A IA já usa o novo texto.');
+  }
+
+  function resetToDefault() {
+    if (confirm('Restaurar o texto padrão? As alterações atuais serão perdidas.')) {
+      document.getElementById('promptEditor').value = DEFAULT_PROMPT;
+      updateCount();
+    }
+  }
+
+  function useTemplate(type) {
+    if (confirm('Substituir pelo template selecionado?')) {
+      document.getElementById('promptEditor').value = TEMPLATES[type];
+      updateCount();
+    }
+  }
+
+  function insertSnippet(text) {
+    const el = document.getElementById('promptEditor');
+    const start = el.selectionStart;
+    const val = el.value;
+    el.value = val.slice(0, start) + text + val.slice(el.selectionEnd);
+    el.selectionStart = el.selectionEnd = start + text.length;
+    el.focus(); updateCount();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  }
+
+  init();
+</script>
+</body>
+</html>
