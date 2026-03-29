@@ -254,7 +254,8 @@
 <script src="/public/js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const supabase = supabase_js.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_KEY);
+  const { createClient } = window.supabase;
+  const supabase = createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_KEY);
 
   const DEFAULT_PROMPT = `Você é a Ana, assistente virtual da Aprimora IA.
 
