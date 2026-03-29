@@ -254,14 +254,11 @@
   </div>
 </div>
 
-<!-- Supabase SDK -->
+<!-- Config pública + Supabase SDK -->
+<script src="/public/js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // ── CONFIG SUPABASE ──
-  // Substitua com suas credenciais do Supabase (Settings → API)
-  const SUPABASE_URL  = 'SEU_SUPABASE_URL';
-  const SUPABASE_KEY  = 'SUA_SUPABASE_ANON_KEY';
-  const supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = supabase_js.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_KEY);
 
   // ── TABS ──
   function switchTab(tab) {

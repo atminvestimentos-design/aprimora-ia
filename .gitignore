@@ -1,2 +1,6 @@
 public/logo/preview-dark.png
 public/logo/preview-light.png
+
+# Variáveis de ambiente — NUNCA subir para o Git
+.env.local
+.env*.local
