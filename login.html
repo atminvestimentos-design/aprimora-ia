@@ -255,24 +255,20 @@
 </div>
 
 <!-- Config pública + Supabase SDK -->
-<script src="/public/js/config.js"></script>
+<script src="public/js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const { createClient } = window.supabase;
-  const supabase = createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_KEY);
-
-  // ── TABS ──
+  // ── UI: definida primeiro para nunca falhar ──
   function switchTab(tab) {
     const isEntrar = tab === 'entrar';
-    document.getElementById('tabEntrar').style.display    = isEntrar ? '' : 'none';
-    document.getElementById('tabCadastrar').style.display = isEntrar ? 'none' : '';
-    document.getElementById('formEntrar').style.display   = isEntrar ? '' : 'none';
-    document.getElementById('formCadastrar').style.display= isEntrar ? 'none' : '';
+    document.getElementById('tabEntrar').style.display     = isEntrar ? '' : 'none';
+    document.getElementById('tabCadastrar').style.display  = isEntrar ? 'none' : '';
+    document.getElementById('formEntrar').style.display    = isEntrar ? '' : 'none';
+    document.getElementById('formCadastrar').style.display = isEntrar ? 'none' : '';
     document.getElementById('btnTabEntrar').classList.toggle('active', isEntrar);
     document.getElementById('btnTabCadastrar').classList.toggle('active', !isEntrar);
     clearMsgs();
   }
-
   function showError(msg) {
     const el = document.getElementById('msgError');
     el.textContent = msg; el.style.display = 'block';
@@ -286,6 +282,18 @@
   function clearMsgs() {
     document.getElementById('msgError').style.display = 'none';
     document.getElementById('msgSuccess').style.display = 'none';
+  }
+
+  // ── Supabase: inicializado separadamente ──
+  let supabase = null;
+  try {
+    const cfg = window.APP_CONFIG || {};
+    supabase = window.supabase.createClient(
+      cfg.SUPABASE_URL  || '',
+      cfg.SUPABASE_KEY  || ''
+    );
+  } catch(e) {
+    console.error('Supabase init error:', e);
   }
 
   // ── LOGIN ──
