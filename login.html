@@ -254,11 +254,8 @@
   </div>
 </div>
 
-<!-- Config pública + Supabase SDK -->
-<script src="public/js/config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- UI functions: carregadas antes de qualquer dependência externa -->
 <script>
-  // ── UI: definida primeiro para nunca falhar ──
   function switchTab(tab) {
     const isEntrar = tab === 'entrar';
     document.getElementById('tabEntrar').style.display     = isEntrar ? '' : 'none';
@@ -284,17 +281,17 @@
     document.getElementById('msgSuccess').style.display = 'none';
   }
 
-  // ── Supabase: inicializado separadamente ──
+</script>
+
+<!-- Config pública + Supabase SDK -->
+<script src="public/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
   let supabase = null;
   try {
     const cfg = window.APP_CONFIG || {};
-    supabase = window.supabase.createClient(
-      cfg.SUPABASE_URL  || '',
-      cfg.SUPABASE_KEY  || ''
-    );
-  } catch(e) {
-    console.error('Supabase init error:', e);
-  }
+    supabase = window.supabase.createClient(cfg.SUPABASE_URL || '', cfg.SUPABASE_KEY || '');
+  } catch(e) { console.error('Supabase init error:', e); }
 
   // ── LOGIN ──
   async function handleLogin(e) {
