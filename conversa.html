@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprimora IA — Vamos conversar</title>
+  <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; background: #F7F9FC; color: #1a1a2e; }
+
+    /* ── HEADER ── */
+    .chat-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: #0A0E1A;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid rgba(6,200,216,0.12);
+    }
+    .chat-header-logo img { height: 38px; width: auto; }
+    .chat-progress {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1; justify-content: center; padding: 0 48px;
+    }
+    .progress-step {
+      width: 32px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,0.12);
+      transition: background 0.4s ease;
+    }
+    .progress-step.active { background: #06C8D8; }
+    .progress-step.done { background: rgba(6,200,216,0.45); }
+    .chat-step-counter {
+      font-size: 0.8rem; font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+    }
+    .chat-step-counter span { color: #06C8D8; }
+
+    /* ── CHAT AREA ── */
+    .chat-main {
+      padding-top: 64px;
+      padding-bottom: 100px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .chat-messages {
+      flex: 1;
+      max-width: 720px; width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* ── MENSAGEM ── */
+    .msg {
+      display: flex; align-items: flex-start; gap: 14px;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .msg.visible { opacity: 1; transform: translateY(0); }
+    .msg-avatar {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .msg-bubble {
+      background: #fff;
+      border-radius: 0 16px 16px 16px;
+      padding: 14px 18px;
+      max-width: 540px;
+      font-size: 1rem; line-height: 1.65;
+      color: #1a1a2e;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    /* Typing indicator */
+    .typing-bubble {
+      background: #fff;
+      border-radius: 0 16px 16px 16px;
+      padding: 14px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .typing-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #06C8D8; opacity: 0.6;
+      animation: typingBounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* Resposta do usuário */
+    .msg-user {
+      flex-direction: row-reverse;
+    }
+    .msg-user .msg-bubble {
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      color: #fff;
+      border-radius: 16px 0 16px 16px;
+      box-shadow: 0 2px 16px rgba(6,200,216,0.25);
+    }
+    .msg-user .msg-avatar {
+      background: rgba(6,200,216,0.12);
+      border: 1px solid rgba(6,200,216,0.3);
+    }
+    .msg-user .msg-avatar svg { color: #06C8D8; }
+
+    /* ── INPUT ── */
+    .chat-input-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-input-wrap {
+      width: 100%; max-width: 720px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .input-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(0,0,0,0.35);
+      padding-left: 4px;
+    }
+    .input-row {
+      display: flex; gap: 10px; align-items: center;
+    }
+    .chat-input {
+      flex: 1;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: 50px;
+      padding: 12px 22px;
+      font-size: 0.97rem;
+      font-family: 'Poppins', sans-serif;
+      color: #1a1a2e;
+      outline: none;
+      transition: border 0.2s;
+      background: #F7F9FC;
+    }
+    .chat-input:focus { border-color: #06C8D8; background: #fff; }
+    .chat-input:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-send {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.2s;
+      box-shadow: 0 4px 14px rgba(6,200,216,0.35);
+    }
+    .btn-send:hover { transform: scale(1.08); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-send svg { color: #fff; }
+
+    /* Chips de seleção rápida */
+    .quick-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 4px 0 2px;
+    }
+    .chip {
+      padding: 6px 16px; border-radius: 50px;
+      border: 1.5px solid rgba(6,200,216,0.4);
+      background: rgba(6,200,216,0.05);
+      color: #06C8D8; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+      font-family: 'Poppins', sans-serif;
+    }
+    .chip:hover { background: rgba(6,200,216,0.12); border-color: #06C8D8; }
+
+    /* ── FIM ── */
+    .chat-end {
+      text-align: center; padding: 32px 24px;
+      max-width: 520px; margin: 0 auto;
+    }
+    .chat-end h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+    .chat-end p { color: rgba(0,0,0,0.55); font-size: 0.95rem; line-height: 1.6; }
+    .btn-end {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 24px;
+      padding: 13px 28px; border-radius: 50px;
+      background: linear-gradient(135deg, #06C8D8, #2563EB);
+      color: #fff; font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; transition: transform 0.2s;
+      box-shadow: 0 4px 20px rgba(6,200,216,0.3);
+    }
+    .btn-end:hover { transform: translateY(-2px); }
+
+    @media (max-width: 600px) {
+      .chat-progress { padding: 0 16px; }
+      .progress-step { width: 20px; }
+      .chat-messages { padding: 24px 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="chat-header">
+  <a href="/" class="chat-header-logo">
+    <img src="public/logo/logo removebg.png" alt="Aprimora IA" />
+  </a>
+  <div class="chat-progress" id="progressBar">
+    <!-- steps gerados via JS -->
+  </div>
+  <div class="chat-step-counter">
+    <span id="currentStep">0</span> de <span id="totalSteps">5</span>
+  </div>
+</header>
+
+<!-- CHAT -->
+<main class="chat-main">
+  <div class="chat-messages" id="chatMessages"></div>
+</main>
+
+<!-- INPUT -->
+<div class="chat-input-bar" id="inputBar">
+  <div class="chat-input-wrap">
+    <div class="quick-chips" id="quickChips"></div>
+    <div class="input-label" id="inputLabel">MENSAGEM</div>
+    <div class="input-row">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Digite aqui..." autocomplete="off" />
+      <button class="btn-send" id="btnSend">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TOTAL_STEPS = 5;
+  let currentStep = 0;
+  let isWaiting = false;
+  const history = []; // histórico para a API
+
+  // Dados coletados
+  const lead = { nome: '', empresa: '', segmento: '', dor: '', contato: '' };
+
+  // Referências DOM
+  const messagesEl = document.getElementById('chatMessages');
+  const inputEl    = document.getElementById('chatInput');
+  const btnSend    = document.getElementById('btnSend');
+  const chipsEl    = document.getElementById('quickChips');
+  const labelEl    = document.getElementById('inputLabel');
+  const stepEl     = document.getElementById('currentStep');
+
+  // ── Progressbar ──
+  function buildProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL_STEPS; i++) {
+      const d = document.createElement('div');
+      d.className = 'progress-step' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
+      bar.appendChild(d);
+    }
+    stepEl.textContent = currentStep;
+  }
+
+  // ── Adicionar mensagem ──
+  function addMessage(text, isUser = false, isTyping = false) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg' + (isUser ? ' msg-user' : '');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    if (isUser) {
+      avatar.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    } else {
+      avatar.innerHTML = `<img src="public/logo/icone removebg.png" alt="Aprimora IA" />`;
+    }
+
+    const bubble = document.createElement('div');
+    if (isTyping) {
+      bubble.className = 'typing-bubble';
+      bubble.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
+    } else {
+      bubble.className = 'msg-bubble';
+      bubble.textContent = text;
+    }
+
+    wrap.appendChild(avatar);
+    wrap.appendChild(bubble);
+    messagesEl.appendChild(wrap);
+
+    requestAnimationFrame(() => {
+      wrap.classList.add('visible');
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+
+    return wrap;
+  }
+
+  // ── Digitar como IA ──
+  async function aiMessage(text, delay = 800) {
+    setInputDisabled(true);
+    await sleep(300);
+    const typingEl = addMessage('', false, true);
+    await sleep(delay);
+    typingEl.remove();
+    addMessage(text, false);
+    setInputDisabled(false);
+    inputEl.focus();
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function setInputDisabled(val) {
+    inputEl.disabled = val;
+    btnSend.disabled = val;
+    isWaiting = val;
+  }
+
+  function setChips(options) {
+    chipsEl.innerHTML = '';
+    options.forEach(opt => {
+      const c = document.createElement('button');
+      c.className = 'chip';
+      c.textContent = opt;
+      c.onclick = () => submitAnswer(opt);
+      chipsEl.appendChild(c);
+    });
+  }
+
+  function clearChips() { chipsEl.innerHTML = ''; }
+
+  // ── FLUXO DA CONVERSA ──
+  async function startFlow() {
+    buildProgress();
+    await sleep(500);
+    await aiMessage('Olá! 👋 Eu sou a assistente da Aprimora IA.', 600);
+    await sleep(200);
+    await aiMessage('Estou aqui para entender seu negócio e mostrar como podemos transformá-lo com automações de IA.', 900);
+    await sleep(200);
+    await aiMessage('Para começar — qual é o seu nome?', 600);
+    labelEl.textContent = 'SEU NOME';
+    inputEl.placeholder = 'Ex: João Silva';
+  }
+
+  async function submitAnswer(value) {
+    if (!value.trim() || isWaiting) return;
+    clearChips();
+    addMessage(value, true);
+    inputEl.value = '';
+    currentStep++;
+    buildProgress();
+
+    if (currentStep === 1) {
+      lead.nome = value;
+      await aiMessage(`Que ótimo, ${value.split(' ')[0]}! 😊`, 500);
+      await sleep(100);
+      await aiMessage('Me conta: qual é o nome da sua empresa e o que ela faz?', 800);
+      labelEl.textContent = 'SUA EMPRESA';
+      inputEl.placeholder = 'Ex: Padaria do João, vendo pães e doces';
+
+    } else if (currentStep === 2) {
+      lead.empresa = value;
+      await aiMessage('Entendi! Agora me diz...', 500);
+      await sleep(100);
+      await aiMessage('Qual é o maior desafio que você enfrenta hoje no seu negócio?', 900);
+      labelEl.textContent = 'PRINCIPAL DESAFIO';
+      inputEl.placeholder = 'Ex: Perco muito tempo respondendo clientes no WhatsApp';
+      setChips([
+        'Atendimento demorado',
+        'Gestão de leads perdidos',
+        'Processos manuais',
+        'Falta de tempo',
+        'Outro'
+      ]);
+
+    } else if (currentStep === 3) {
+      lead.dor = value;
+      setInputDisabled(true);
+      await aiAwareResponse(value);
+
+    } else if (currentStep === 4) {
+      lead.contato = value;
+      await endFlow();
+    }
+  }
+
+  // ── Resposta inteligente via API ──
+  async function aiAwareResponse(dor) {
+    const typingEl = addMessage('', false, true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead,
+          dor,
+          mensagem: `O cliente se chama ${lead.nome}, tem uma empresa chamada "${lead.empresa}" e seu principal desafio é: "${dor}". Responda de forma personalizada como a Aprimora IA pode ajudar especificamente esse negócio. Seja breve (2-3 frases), empático e mostre valor concreto.`
+        })
+      });
+      const data = await res.json();
+      typingEl.remove();
+      addMessage(data.resposta, false);
+    } catch {
+      typingEl.remove();
+      addMessage(`Perfeito, ${lead.nome.split(' ')[0]}! Com automações de IA conseguimos resolver exatamente isso — reduzindo o trabalho manual e melhorando seus resultados. 🚀`, false);
+    }
+
+    await sleep(600);
+    setInputDisabled(false);
+    await aiMessage('Para te enviar uma proposta personalizada, qual é o seu melhor contato? (WhatsApp ou e-mail)', 800);
+    labelEl.textContent = 'SEU CONTATO';
+    inputEl.placeholder = 'Ex: (11) 99999-9999 ou email@empresa.com';
+    inputEl.focus();
+  }
+
+  async function endFlow() {
+    currentStep = TOTAL_STEPS;
+    buildProgress();
+    setInputDisabled(true);
+    document.getElementById('inputBar').style.display = 'none';
+
+    await aiMessage(`Perfeito, ${lead.nome.split(' ')[0]}! 🎉`, 500);
+    await sleep(200);
+    await aiMessage('Registrei tudo e em breve nossa equipe vai entrar em contato com uma proposta personalizada para o seu negócio.', 900);
+    await sleep(400);
+
+    const endEl = document.createElement('div');
+    endEl.className = 'chat-end msg visible';
+    endEl.innerHTML = `
+      <div>
+        <h2>Tudo certo! 🚀</h2>
+        <p>Obrigado pelo seu tempo. Vamos analisar o seu perfil e preparar a melhor solução para a <strong>${lead.empresa}</strong>.</p>
+        <a href="/" class="btn-end">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Voltar ao site
+        </a>
+      </div>
+    `;
+    messagesEl.appendChild(endEl);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    // Envia lead para a API
+    try {
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'salvar_lead', lead })
+      });
+    } catch {}
+  }
+
+  // ── Eventos ──
+  btnSend.addEventListener('click', () => submitAnswer(inputEl.value.trim()));
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitAnswer(inputEl.value.trim());
+    }
+  });
+
+  // ── Init ──
+  buildProgress();
+  document.getElementById('totalSteps').textContent = TOTAL_STEPS;
+  startFlow();
+</script>
+</body>
+</html>

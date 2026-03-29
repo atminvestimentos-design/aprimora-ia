@@ -40,7 +40,7 @@
   --shadow-lg:     0 12px 40px rgba(0,0,0,0.18);
   --shadow-glow:   0 0 28px rgba(6,200,216,0.18);
   --transition:    all 0.3s ease;
-  --max-width:     1200px;
+  --max-width:     1380px;
   --header-height: 80px;
 }
 
@@ -63,7 +63,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 16px;
 }
 
 /* =========================================
@@ -173,7 +173,32 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 .nav-links a:hover { color: var(--white); }
 .nav-links a:hover::after { width: 100%; }
-.nav-cta { margin-left: 12px; }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+}
+.btn-ghost-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-ghost-header:hover {
+  color: var(--white);
+  border-color: rgba(6,200,216,0.4);
+  background: rgba(6,200,216,0.06);
+}
 
 /* Hamburger */
 .hamburger {
@@ -345,15 +370,15 @@ section { padding: 100px 0; position: relative; }
 .hero-inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 64px;
+  gap: 48px;
   align-items: center;
-  padding: 48px 0 110px;
+  padding: 16px 0 32px;
   position: relative; z-index: 1;
 }
 .hero-visual {
-  margin-top: -40px;
+  margin-top: 0;
 }
-.hero-content { color: var(--white); }
+.hero-content { color: var(--white); padding-top: 32px; }
 .hero-badge {
   display: inline-flex;
   align-items: center;
@@ -380,10 +405,10 @@ section { padding: 100px 0; position: relative; }
   50%       { opacity: 0.35; transform: scale(1.6); }
 }
 .hero-title {
-  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
   font-weight: 800;
   line-height: 1.14;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 .hero-title .highlight {
@@ -393,16 +418,28 @@ section { padding: 100px 0; position: relative; }
   background-clip: text;
 }
 .hero-subtitle {
-  font-size: 1.05rem;
+  font-size: 0.97rem;
   color: rgba(255,255,255,0.58);
-  margin-bottom: 38px;
-  line-height: 1.78;
+  margin-bottom: 48px;
+  line-height: 1.75;
   max-width: 500px;
 }
-.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hero-link-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.hero-link-cta svg { color: #25D366; }
+.hero-link-cta:hover { color: rgba(255,255,255,0.9); }
 .hero-stats {
-  display: flex; gap: 32px;
-  margin-top: 48px; padding-top: 32px;
+  display: flex; gap: 40px;
+  margin-top: 36px; padding-top: 28px;
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 .hero-stat strong {
@@ -413,7 +450,7 @@ section { padding: 100px 0; position: relative; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.hero-stat span {
+.hero-stat > span {
   font-size: 0.76rem;
   color: rgba(255,255,255,0.42);
   margin-top: 5px;
@@ -425,9 +462,28 @@ section { padding: 100px 0; position: relative; }
   align-items: flex-start;
   padding-top: 0;
 }
+.hero-visual-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 24px;
+}
+.hero-badge-right {
+  margin-bottom: 12px;
+  margin-top: 0;
+  white-space: nowrap;
+}
 .hero-svg-wrap {
   position: relative;
-  width: 100%; max-width: 520px;
+  width: 100%; max-width: 500px;
+  transform: perspective(800px) rotateY(-18deg) rotateX(8deg) scale(1.04);
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  filter: drop-shadow(0 32px 56px rgba(6,200,216,0.22)) drop-shadow(0 8px 28px rgba(37,99,235,0.28));
+}
+.hero-svg-wrap:hover {
+  transform: perspective(800px) rotateY(-6deg) rotateX(3deg) scale(1.06);
 }
 .hero-svg-glow {
   position: absolute; inset: -40px;
@@ -789,7 +845,7 @@ footer {
 
 @media (max-width: 768px) {
   section { padding: 72px 0; }
-  .nav-links, .nav-cta { display: none; }
+  .nav-links, .nav-cta, .nav-actions { display: none; }
   .hamburger { display: flex; }
   .logo img { height: 52px; }
   .hero-title { font-size: 2rem; }
