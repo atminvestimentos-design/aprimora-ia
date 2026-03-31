@@ -835,7 +835,7 @@ footer {
   .hero-subtitle { margin: 0 auto 36px; }
   .hero-actions { justify-content: center; }
   .hero-stats { justify-content: center; }
-  .hero-visual { order: -1; margin-top: 0; }
+  .hero-visual { order: 1; margin-top: 0; }
   .steps-wrapper::before { display: none; }
   .steps-wrapper { flex-direction: column; align-items: center; gap: 32px; }
   .step { max-width: 480px; }
